@@ -1,0 +1,80 @@
+DEVICE          : cuda              # device used for training and evaluation (cpu, cuda, cuda0, cuda1, ...)
+SAVE_DIR        : 'output'          # output folder name used for saving the model, logs and inference results
+
+# MODEL:
+  # NAME          : CMNeXt                                            # name of the model you are using
+  # BACKBONE      : CMNeXt-B2                                         # model variant
+  # PRETRAINED    : 'checkpoints/pretrained/segformer/mit_b4.pth'     # backbone model's weight 
+  # RESUME        : ''                                                # checkpoint file
+
+MODEL:
+  NAME          : SegFormer                                            # name of the model you are using
+  BACKBONE      : DINOv2_B                                         # model variant
+  # BACKBONE      : EVACLIP_B                                         # model variant
+  TEXT_ENCODER  : CLIP
+  PATCH_SIZE    : 16
+  # PRETRAINED    : 'checkpoints/pretrained/dinov2/dinov2_vitb14_pretrain.pth'     # backbone model's weight 
+  # PRETRAINED    : 'checkpoints/pretrained/clip/ViT-B-16.pt'     # backbone model's weight 
+  # PRETRAINED    : 'checkpoints/pretrained/eva_clip/EVA02_CLIP_B_psz16_s8B.pt'     # backbone model's weight 
+  PRETRAINED    : 'checkpoints/pretrained/dinov2/neco_on_dinov2_vit14_teacher.ckpt'     # backbone model's weight
+  # PRETRAINED    : 'checkpoints/pretrained/franca/franca_vitb14_In21k.pth'     # backbone model's weight
+  RESUME        : ''
+
+DATASET:
+  NAME          : MCubeS                                          # dataset name to be trained with (camvid, cityscapes, ade20k)
+  ROOT          : 'data/MCubeS/multimodal_dataset'                # dataset root path
+  IGNORE_LABEL  : 255
+  # MODALS        : ['image'] # 
+  # MODALS        : ['aolp']
+  # MODALS        : ['dolp']
+  # MODALS        : ['nir']
+  # MODALS        : ['image', 'aolp']
+  # MODALS        : ['image', 'dolp']
+  # MODALS        : ['image', 'nir']
+  # MODALS        : ['aolp', 'dolp']
+  # MODALS        : ['aolp', 'nir']
+  # MODALS        : ['dolp', 'nir']
+  # MODALS        : ['image', 'aolp', 'dolp']
+  # MODALS        : ['image', 'aolp', 'nir']
+  # MODALS        : ['image', 'dolp', 'nir']
+  # MODALS        : ['aolp', 'dolp', 'nir']
+  MODALS        : ['image', 'aolp', 'dolp', 'nir']
+
+TRAIN:
+  IMAGE_SIZE    : [512, 512]      # training image size in (h, w) === Fixed in dataloader, following MCubeSNet
+  BATCH_SIZE    : 4               # batch size used to train
+  EPOCHS        : 500             # number of epochs to train
+  EVAL_START    : 400             # evaluation interval during training
+  EVAL_INTERVAL : 1               # evaluation interval during training
+  AMP           : false           # use AMP in training
+  DDP           : true            # use DDP training
+
+LOSS:
+  NAME          : OhemCrossEntropy     # loss function name
+  CLS_WEIGHTS   : false            # use class weights in loss calculation
+
+OPTIMIZER:
+  NAME          : adamw           # optimizer name
+  # LR            : 0.00006         # initial learning rate used in optimizer
+  # LR            : 0.00035         # initial learning rate used in optimizer
+  LR            : 0.0005         # initial learning rate used in optimizer
+  WEIGHT_DECAY  : 0.01            # decay rate used in optimizer 
+
+SCHEDULER:
+  NAME          : warmuppolylr    # scheduler name
+  POWER         : 0.9             # scheduler power
+  WARMUP        : 10              # warmup epochs used in scheduler
+  WARMUP_RATIO  : 0.1             # warmup ratio
+  
+
+EVAL:
+  # MODEL_PATH    : 'output/MCubeS/cmnext_b2_mcubes_rgb.pth'
+  # MODEL_PATH    : 'output/MCubeS/cmnext_b2_mcubes_rgba.pth'
+  # MODEL_PATH    : 'output/MCubeS/cmnext_b2_mcubes_rgbad.pth'
+  # MODEL_PATH    : 'output/MCubeS/cmnext_b2_mcubes_rgbadn.pth'
+  IMAGE_SIZE    : [512, 512]    # evaluation image size in (h, w)                       
+  BATCH_SIZE    : 2               # batch size used to train
+  MSF: 
+    ENABLE      : false                                   # multi-scale and flip evaluation  
+    FLIP        : true                                    # use flip in evaluation  
+    SCALES      : [0.5, 0.75, 1.0, 1.25, 1.5, 1.75]       # scales used in MSF evaluation                
